@@ -1,0 +1,78 @@
+<div class="modal-overlay" (click)="onOverlayClick($event)">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>{{ isEditMode ? 'Editar Cliente' : 'Nuevo Cliente' }}</h3>
+      <button class="close-btn" (click)="close.emit()">✕</button>
+    </div>
+
+    <form (ngSubmit)="onSave()" class="client-form">
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input 
+          type="text" 
+          [(ngModel)]="formData.name" 
+          name="name"
+          placeholder="Nombre del cliente"
+          required>
+      </div>
+
+      <div class="form-group">
+        <label>Email</label>
+        <input 
+          type="email" 
+          [(ngModel)]="formData.email" 
+          name="email"
+          placeholder="email@ejemplo.com">
+      </div>
+
+      <div class="form-group">
+        <label>Teléfono</label>
+        <input 
+          type="tel" 
+          [(ngModel)]="formData.phone" 
+          name="phone"
+          placeholder="555-0000">
+      </div>
+
+      <div class="form-group">
+        <label>Dirección</label>
+        <input 
+          type="text" 
+          [(ngModel)]="formData.address" 
+          name="address"
+          placeholder="Dirección completa">
+      </div>
+
+      <div class="form-group">
+        <label>Notas</label>
+        <textarea 
+          [(ngModel)]="formData.notes" 
+          name="notes"
+          placeholder="Notas adicionales..."
+          rows="3"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Color asignado</label>
+        <div class="color-selector">
+          <div 
+            *ngFor="let color of colors"
+            class="color-circle"
+            [class.selected]="formData.color === color"
+            [style.background]="color"
+            (click)="selectColor(color)">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" (click)="close.emit()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-save">
+          {{ isEditMode ? 'Actualizar' : 'Guardar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

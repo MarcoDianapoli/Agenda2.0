@@ -1,0 +1,14 @@
+<div class="view-selector" (blur)="onBlur()">
+  <button class="view-button" (click)="toggleDropdown()">
+    📅 {{ getViewLabel(currentView) }}
+  </button>
+  
+  <div class="dropdown-menu" *ngIf="isDropdownOpen">
+    <button
+      *ngFor="let view of views"
+      [class.active]="view.value === currentView"
+      (click)="selectView(view.value)">
+      {{ view.label }}
+    </button>
+  </div>
+</div>

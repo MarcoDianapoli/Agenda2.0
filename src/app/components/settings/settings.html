@@ -1,0 +1,86 @@
+<div class="settings-container">
+  <div class="settings-header">
+    <h2>⚙️ Configuración</h2>
+    <p>Personaliza tu agenda</p>
+  </div>
+
+  <div class="settings-body">
+    <!-- Nombre de la App -->
+    <div class="setting-group">
+      <label class="setting-label">Nombre de la Aplicación</label>
+      <input 
+        type="text" 
+        class="setting-input"
+        [(ngModel)]="config.appName"
+        (ngModelChange)="onAppNameChange()"
+        placeholder="Agenda Personal">
+    </div>
+
+    <!-- Color del Header -->
+    <div class="setting-group">
+      <label class="setting-label">Color del Encabezado</label>
+      <div class="color-picker-wrapper">
+        <input 
+          type="color" 
+          class="color-picker"
+          [(ngModel)]="config.headerColor"
+          (ngModelChange)="onHeaderColorChange()">
+        <span class="color-value">{{ config.headerColor }}</span>
+      </div>
+    </div>
+
+    <!-- Tipo de Letra -->
+    <div class="setting-group">
+      <label class="setting-label">Tipo de Letra</label>
+      <select 
+        class="setting-select"
+        [(ngModel)]="config.fontFamily"
+        (ngModelChange)="onFontChange()">
+        <option *ngFor="let font of fontOptions" [value]="font.value">
+          {{ font.label }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Color de Fondo -->
+    <div class="setting-group">
+      <label class="setting-label">Color de Fondo</label>
+      <div class="color-picker-wrapper">
+        <input 
+          type="color" 
+          class="color-picker"
+          [(ngModel)]="config.backgroundColor"
+          (ngModelChange)="onBgColorChange()">
+        <span class="color-value">{{ config.backgroundColor }}</span>
+      </div>
+    </div>
+
+    <!-- Imagen de Fondo -->
+    <div class="setting-group">
+      <label class="setting-label">Imagen de Fondo</label>
+      <div class="image-upload-section">
+        <input 
+          type="file" 
+          id="bgImage"
+          accept="image/*"
+          class="file-input"
+          (change)="onImageSelected($event)">
+        <label for="bgImage" class="file-label">
+          📁 Seleccionar Imagen
+        </label>
+        
+        <div class="image-preview" *ngIf="previewImage">
+          <img [src]="previewImage" alt="Preview">
+          <button class="remove-btn" (click)="removeImage()">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botón Reset -->
+    <div class="setting-group">
+      <button class="reset-btn" (click)="resetToDefaults()">
+        🔄 Restaurar Valores Predeterminados
+      </button>
+    </div>
+  </div>
+</div>

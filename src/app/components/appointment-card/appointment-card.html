@@ -1,0 +1,49 @@
+<div 
+  class="appointment-card"
+  [style.border-left]="'4px solid' + getColorForStatus()">
+  
+  <!-- Hora a la izquierda -->
+  <div class="card-time">
+    <span>{{ cita.time }}</span>
+  </div>
+  
+  <!-- Información de la cita -->
+  <div class="card-content">
+    <h4 class="card-title">{{ cita.title }}</h4>
+    <p class="card-client" *ngIf="getClientName()">
+      👤 Cliente: {{ getClientName() }}
+    </p>
+    <p class="card-description" *ngIf="cita.description">{{ cita.description }}</p>
+    
+    <div class="card-badges">
+      <span 
+        class="status-badge"
+        [style.background-color]="getColorForStatus()">
+        {{ getStatusLabel(cita.status) }}
+      </span>
+      
+      <span class="payment-badge" *ngIf="cita.paymentStatus">
+        💵 {{ getPaymentStatusLabel(cita.paymentStatus) }}
+      </span>
+      
+      <span class="amount" *ngIf="cita.amount">
+        ${{ cita.amount | number:'1.2-2' }}
+      </span>
+    </div>
+  </div>
+  
+  <!-- Botón de 3 puntos verticales -->
+  <div class="card-actions">
+    <button class="menu-button" (click)="toggleMenu()">
+      ⋮
+    </button>
+    
+    <!-- Menú contextual -->
+    <div class="context-menu" *ngIf="activeMenuId === cita.id">
+      <button (click)="onEdit()">✏️ Editar</button>
+      <button (click)="onChangeStatus()">🔄 Cambiar estado</button>
+      <button (click)="onChangePaymentStatus()">💵 Cambiar pago</button>
+      <button class="delete-btn" (click)="onDelete()">🗑️ Eliminar</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,54 @@
+.date-navigator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 15px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+}
+
+.nav-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #e0e0e0;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: #555;
+  transition: all 0.2s ease;
+}
+
+.nav-button:hover {
+  background: #4CAF50;
+  border-color: #4CAF50;
+  color: white;
+  transform: scale(1.1);
+}
+
+.date-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-text {
+  font-size: 1.1rem;
+  color: #333;
+  text-transform: capitalize;
+}
+
+.today-badge {
+  background: #4CAF50;
+  color: white;
+  padding: 3px 10px;
+  border-radius: 15px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}

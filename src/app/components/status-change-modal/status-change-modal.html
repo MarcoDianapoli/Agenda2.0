@@ -1,0 +1,26 @@
+<div class="modal-overlay" (click)="onCancel()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Cambiar Estado</h2>
+      <button class="close-button" (click)="onCancel()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Cita: {{ cita.title }}</label>
+        <p>Estado actual: <strong>{{ getStatusLabel(cita.status) }}</strong></p>
+      </div>
+      <div class="form-group">
+        <label for="status">Nuevo Estado</label>
+        <select id="status" name="status" [(ngModel)]="selectedStatus">
+          <option *ngFor="let opt of statusOptions" [value]="opt.value">
+            {{ opt.label }}
+          </option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-cancel" (click)="onCancel()">Cancelar</button>
+      <button type="button" class="btn-save" (click)="onSave()">Guardar</button>
+    </div>
+  </div>
+</div>

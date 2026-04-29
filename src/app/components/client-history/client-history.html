@@ -1,0 +1,57 @@
+<div class="history-overlay" (click)="close.emit()">
+  <div class="history-content" (click)="$event.stopPropagation()">
+    <div class="history-header">
+      <h3>Historial de {{ client.name }}</h3>
+      <button class="close-btn" (click)="close.emit()">✕</button>
+    </div>
+
+    <div class="history-body">
+      <!-- Client Info -->
+      <div class="client-info" *ngIf="client">
+        <p *ngIf="client.email">📧 {{ client.email }}</p>
+        <p *ngIf="client.phone">📞 {{ client.phone }}</p>
+        <p *ngIf="client.address">📍 {{ client.address }}</p>
+      </div>
+
+      <!-- New Appointment Button -->
+      <button class="new-appointment-btn" (click)="createNewAppointment()">
+        + Nueva cita para este cliente
+      </button>
+
+      <!-- Appointments List -->
+      <div class="appointments-list" *ngIf="appointments.length > 0">
+        <h4>Citas anteriores ({{ appointments.length }})</h4>
+        
+        <div class="appointment-item" *ngFor="let cita of appointments">
+          <div class="appointment-date">
+            <span class="date">{{ formatDate(cita.date) }}</span>
+            <span class="time">{{ formatTime(cita.time) }}</span>
+          </div>
+          
+          <div class="appointment-details">
+            <h5>{{ cita.title }}</h5>
+            <p *ngIf="cita.description">{{ cita.description }}</p>
+          </div>
+          
+          <div class="appointment-status">
+            <span 
+              class="status-badge"
+              [style.background]="getStatusColor(cita.status)">
+              {{ getStatusLabel(cita.status) }}
+            </span>
+          </div>
+          
+          <div class="appointment-amount" *ngIf="cita.amount">
+            ${{ cita.amount | number:'1.2-2' }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="appointments.length === 0">
+        <div class="empty-icon">📅</div>
+        <p>No hay citas para este cliente</p>
+      </div>
+    </div>
+  </div>
+</div>

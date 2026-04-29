@@ -1,0 +1,173 @@
+<!-- ============================================= -->
+<!-- MODAL: Fondo oscuro semitransparente           -->
+<!-- ============================================= -->
+
+<!-- 
+  modal-overlay → Cubre toda la pantalla con un fondo oscuro
+  (click)="onCancel()" → Si el usuario hace clic FUERA del formulario, se cierra
+-->
+<div class="modal-overlay" (click)="onCancel()">
+  
+  <!-- 
+    modal-content → La tarjeta blanca del formulario
+    (click)="$event.stopPropagation()" → Evita que el clic en la tarjeta
+    se propague al fondo (si no, se cerraría al hacer clic en cualquier parte)
+  -->
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    
+    <!-- ============================================= -->
+    <!-- CABECERA DEL MODAL                             -->
+    <!-- ============================================= -->
+    <div class="modal-header">
+      <h2>Nueva Cita</h2>
+      <!-- Botón X para cerrar -->
+      <button class="close-button" (click)="onCancel()">✕</button>
+    </div>
+    
+    <!-- ============================================= -->
+    <!-- CUERPO DEL FORMULARIO                          -->
+    <!-- ============================================= -->
+    
+    <!-- 
+      (ngSubmit)="onSubmit()" → Se ejecuta al presionar Enter o el botón Guardar
+    -->
+    <form (ngSubmit)="onSubmit()" class="modal-body">
+      
+      <!-- ------------------------------------------------- -->
+      <!-- CAMPO: Título (obligatorio)                       -->
+      <!-- ------------------------------------------------- -->
+      <div class="form-group">
+        <label for="title">Título *</label>
+        <!-- 
+          [(ngModel)] → Two-way data binding
+          - Los cambios en el input actualizan formData.title
+          - Los cambios en formData.title actualizan el input
+          name="title" → Requerido por ngModel para identificar el campo
+        -->
+        <input 
+          type="text" 
+          id="title" 
+          name="title"
+          [(ngModel)]="formData.title" 
+          placeholder="Ej: Consulta con María"
+          required
+        />
+      </div>
+      
+      <!-- ------------------------------------------------- -->
+      <!-- CAMPO: Descripción (opcional)                     -->
+      <!-- ------------------------------------------------- -->
+      <div class="form-group">
+        <label for="description">Descripción</label>
+        <!-- textarea → Para texto multilínea, rows="3" = 3 líneas de alto -->
+        <textarea 
+          id="description" 
+          name="description"
+          [(ngModel)]="formData.description" 
+          placeholder="Notas adicionales..."
+          rows="3"
+        ></textarea>
+      </div>
+      
+      <!-- ------------------------------------------------- -->
+      <!-- FILA: Fecha y Hora (en línea)                     -->
+      <!-- ------------------------------------------------- -->
+      <div class="form-row">
+        
+        <!-- Fecha -->
+        <div class="form-group">
+          <label for="date">Fecha</label>
+          <!-- type="date" → Muestra un selector de fecha nativo del navegador -->
+          <input 
+            type="date" 
+            id="date" 
+            name="date"
+            [(ngModel)]="formData.date"
+          />
+        </div>
+        
+        <!-- Hora -->
+        <div class="form-group">
+          <label for="time">Hora</label>
+          <!-- type="time" → Muestra un selector de hora nativo -->
+          <input 
+            type="time" 
+            id="time" 
+            name="time"
+            [(ngModel)]="formData.time"
+          />
+        </div>
+        
+      </div>
+      
+      <!-- ------------------------------------------------- -->
+      <!-- SELECTOR: Cliente (opcional)                      -->
+      <!-- ------------------------------------------------- -->
+      <div class="form-group">
+        <label for="client">Cliente</label>
+        <select id="client" name="client" [(ngModel)]="formData.clientId">
+          <option [ngValue]="null">Sin cliente asignado</option>
+          <option *ngFor="let client of activeClients" [ngValue]="client.id">
+            {{ client.name }}
+          </option>
+        </select>
+      </div>
+      
+      <!-- ------------------------------------------------- -->
+      <!-- SELECTOR: Estado de la cita                       -->
+      <!-- ------------------------------------------------- -->
+      <div class="form-group">
+        <label for="status">Estado</label>
+        <!-- 
+          <select> → Menú desplegable
+          *ngFor → Itera sobre statusOptions (array de {value, label})
+          [value]="opt.value" → El valor real que se guarda (ej: 'pending')
+          {{ opt.label }} → Lo que ve el usuario (ej: 'Pendiente')
+        -->
+        <select id="status" name="status" [(ngModel)]="formData.status">
+          <option *ngFor="let opt of statusOptions" [value]="opt.values">
+            {{ opt.label }}
+          </option>
+        </select>
+      </div>
+      
+      <!-- ------------------------------------------------- -->
+      <!-- CAMPO: Monto (opcional)                           -->
+      <!-- ------------------------------------------------- -->
+      <div class="form-group">
+        <label for="amount">Monto ($)</label>
+        <!-- 
+          type="number" → Solo permite números
+          min="0" → No permite valores negativos
+          step="0.01" → Permite decimales (centavos)
+        -->
+        <input 
+          type="number" 
+          id="amount" 
+          name="amount"
+          [(ngModel)]="formData.amount" 
+          placeholder="0.00"
+          min="0"
+          step="0.01"
+        />
+      </div>
+      
+      <!-- ------------------------------------------------- -->
+      <!-- BOTONES DE ACCIÓN                                 -->
+      <!-- ------------------------------------------------- -->
+      <div class="modal-footer">
+        <!-- 
+          type="button" → No envía el formulario (si no, se enviaría con este botón)
+          (click)="onCancel()" → Cierra el modal sin guardar
+        -->
+        <button type="button" class="btn-cancel" (click)="onCancel()">Cancelar</button>
+        
+        <!-- 
+          type="submit" → Envía el formulario (dispara ngSubmit)
+        -->
+        <button type="submit" class="btn-save">Guardar Cita</button>
+      </div>
+      
+    </form>
+  </div>
+</div>

@@ -1,0 +1,10 @@
+<div class="date-navigator">
+  <button class="nav-button" (click)="goToPreviousDay()">◀</button>
+  
+  <div class="date-display">
+    <span class="date-text">{{ formattedDate }}</span>
+    <span class="today-badge" *ngIf="isToday">HOY</span>
+  </div>
+  
+  <button class="nav-button" (click)="goToNextDay()">▶</button>
+</div>

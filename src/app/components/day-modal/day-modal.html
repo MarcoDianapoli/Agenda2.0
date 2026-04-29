@@ -1,0 +1,49 @@
+<div class="modal-overlay" (click)="close.emit()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ getFormattedDate() }}</h2>
+      <button class="close-button" (click)="close.emit()">✕</button>
+    </div>
+    
+    <div class="modal-body">
+      <!-- Sin citas -->
+      <div class="empty-state" *ngIf="citas.length === 0">
+        <div class="empty-icon">📅</div>
+        <p>No hay citas para este día</p>
+      </div>
+
+      <!-- Lista de citas -->
+      <div class="citas-list" *ngIf="citas.length > 0">
+        <div 
+          class="cita-item"
+          *ngFor="let cita of citas"
+          [style.border-left]="'4px solid' + getColorForStatus(cita.status)">
+          
+          <div class="cita-time">{{ cita.time }}</div>
+          
+          <div class="cita-content">
+            <h4 class="cita-title">{{ cita.title }}</h4>
+            <p class="cita-desc" *ngIf="cita.description">{{ cita.description }}</p>
+            <div class="cita-badges">
+              <span class="status-badge" [style.background-color]="getColorForStatus(cita.status)">
+                {{ getStatusLabel(cita.status) }}
+              </span>
+              <span class="payment-badge">
+                💵 {{ getPaymentStatusLabel(cita.paymentStatus) }}
+              </span>
+              <span class="amount" *ngIf="cita.amount">
+                ${{ cita.amount | number:'1.2-2' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="cita-actions">
+            <button class="action-btn" (click)="onEdit(cita)">✏️</button>
+            <button class="action-btn" (click)="onChangeStatus(cita)">🔄</button>
+            <button class="action-btn delete" (click)="onDelete(cita)">🗑️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,70 @@
+<div class="calendar-container">
+    <!-- ======================= -->
+    <!-- Header -->
+    <!-- ======================= -->
+    <div class="calendar-header">
+        <button class="nav-button" (click)="goToPreviousDay()"><span>◀</span></button>
+        <div class="current-date" [class.today]="isToday()">
+            <h2>{{ getFormattedDate() }}</h2>
+            <span *ngIf="isToday()" class="today-badge">HOY</span>
+        </div>
+        <button class="nav-button" (click)="goToNextDay()"><span>▶</span></button>
+    </div>
+    <!-- ======================= -->
+    <!-- Cantidad de citas -->
+    <!-- ======================= -->
+    <div class="appointment-summary" *ngIf="todayAppointments.length > 0">
+        <p>{{ todayAppointments.length }} citas para este dia</p>
+    </div>
+
+    <!-- ======================= -->
+    <!-- Lista de Citas -->
+    <!-- ======================= -->
+    <div class="appointments-list">
+        <!-- Mensaje para cuando no hay citas-->
+         <div class="no-appointments" *ngIf="todayAppointments.length === 0">
+            <div class="empty-state">
+                <span class="empty-icon">🗓️</span>
+                <h3>No hay citas para el dia de hoy</h3>
+                <p>Disfruta tu dia libre! </p>
+            </div>
+         </div>
+         <!-- Lista de citas -->
+        <div class="appointment-card"
+        *ngFor="let cita of todayAppointments"
+        [style.border-left]="'4px solid' + (cita.color || '#4caf50')">
+        <!-- hora -->
+            <div  class="card-time">
+                <span>{{ cita.time }}</span>
+            </div>
+        <!-- Informacion de la cita -->
+            <div class="card-content">
+                <h4 class="card-title">{{ cita.title }}</h4>
+                <p class="card-description" *ngIf="cita.description">{{ cita.description }}</p>
+                <span class="status-badge"
+                    [style.background-color]="cita.color">
+                    {{ getStatusLabel(cita.status)}}
+                </span>
+                <span class="amount" *ngIf="cita.amount">
+                    ${{ cita.amount | number:'1.2-2'}}
+                </span>
+                <span>
+                    💵{{getPaymentStatusLabel(cita.paymentStatus)}}
+                </span>
+                
+            </div>
+            <div class="card-actions">
+                <button class="menu-button" (click)="toggleMenu(cita)">
+                    ⋮
+                </button>
+        <!-- Menú contextual (se muestra al hacer clic en ⋮) -->
+                <div class="context-menu" *ngIf="activeMenuId === cita.id">
+                <button (click)="editAppointment(cita)">✏️ Editar</button>
+                <button (click)="changeStatus(cita)">🔄 Cambiar estado</button>
+                <button (click)="changePaymentStatus(cita)">💵 Cambiar pago</button>
+                <button (click)="deleteAppointment(cita)">🗑️ Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,104 @@
+<div class="clients-container">
+  <!-- Header con búsqueda y botón agregar -->
+  <div class="clients-header">
+    <div class="search-box">
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        (ngModelChange)="filterClients()"
+        placeholder="Buscar por nombre, email o teléfono..."
+        class="search-input">
+    </div>
+    
+    <div class="header-actions">
+      <label class="toggle-inactive">
+        <input 
+          type="checkbox" 
+          [(ngModel)]="showInactive" 
+          (ngModelChange)="filterClients()">
+        <span>Mostrar inactivos</span>
+      </label>
+      
+      <button class="add-button" (click)="openNewClient()">
+        + Agregar Cliente
+      </button>
+    </div>
+  </div>
+
+  <!-- Contador de clientes -->
+  <div class="clients-count">
+    {{ activeClientsCount }} clientes activos
+  </div>
+
+  <!-- Lista de clientes -->
+  <div class="clients-list" *ngIf="filteredClients.length > 0">
+    <div 
+      class="client-card"
+      *ngFor="let client of filteredClients"
+      [style.border-left]="'4px solid' + (client.color || '#999')">
+      
+      <div class="client-info">
+        <h4 class="client-name">
+          {{ client.name }}
+          <span class="status-badge" [class.active]="client.isActive" [class.inactive]="!client.isActive">
+            {{ client.isActive ? 'Activo' : 'Inactivo' }}
+          </span>
+        </h4>
+        
+        <div class="client-details">
+          <span *ngIf="client.email">📧 {{ client.email }}</span>
+          <span *ngIf="client.phone">📞 {{ client.phone }}</span>
+        </div>
+        
+        <div class="client-meta">
+          <span class="appointments-count">
+            📅 {{ getClientAppointmentsCount(client.id) }} citas
+          </span>
+          <span class="last-appointment" *ngIf="client.lastAppointmentDate">
+            Última: {{ formatDate(client.lastAppointmentDate) }}
+          </span>
+        </div>
+      </div>
+      
+      <div class="client-actions">
+        <button class="action-btn history" (click)="openClientHistory(client)">
+          📋
+        </button>
+        <button class="action-btn edit" (click)="openEditClient(client)">
+          ✏️
+        </button>
+        <button 
+          class="action-btn toggle"
+          [class.deactivate]="client.isActive"
+          [class.reactivate]="!client.isActive"
+          (click)="toggleClientStatus(client)">
+          {{ client.isActive ? '🚫' : '✅' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado vacío -->
+  <div class="empty-state" *ngIf="filteredClients.length === 0">
+    <div class="empty-icon">👥</div>
+    <h3>No hay clientes</h3>
+    <p *ngIf="searchTerm">No se encontraron clientes con "{{ searchTerm }}"</p>
+    <p *ngIf="!searchTerm">Comienza agregando tu primer cliente</p>
+  </div>
+</div>
+
+<!-- Modal de formulario -->
+<app-client-form
+  *ngIf="showModal"
+  [client]="selectedClient"
+  (close)="onModalClose()"
+  (save)="onModalSave($event)">
+</app-client-form>
+
+<!-- Modal de historial de cliente -->
+<app-client-history
+  *ngIf="showHistory && selectedClientForHistory"
+  [client]="selectedClientForHistory"
+  (close)="closeHistory()"
+  (newAppointment)="onNewAppointmentFromHistory($event)">
+</app-client-history>

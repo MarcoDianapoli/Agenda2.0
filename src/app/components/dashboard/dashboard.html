@@ -1,0 +1,144 @@
+<div class="dashboard-container">
+
+  <!-- Título -->
+  <h1>📊 Panel de Control</h1>
+
+  <!-- FILA 1: 4 Tarjetas de resumen -->
+  <div class="summary-cards">
+    <div class="card card-blue">
+      <span class="card-icon">📅</span>
+      <span class="card-value">{{ summary.todayAppointments }}</span>
+      <span class="card-label">Citas Hoy</span>
+    </div>
+    <div class="card card-green">
+      <span class="card-icon">💰</span>
+      <span class="card-value">{{ formatCurrency(summary.todayIncome) }}</span>
+      <span class="card-label">Ingresos Hoy</span>
+    </div>
+    <div class="card card-orange">
+      <span class="card-icon">⏳</span>
+      <span class="card-value">{{ formatCurrency(summary.totalPendingPayment) }}</span>
+      <span class="card-label">Pendiente de Cobro</span>
+    </div>
+    <div class="card card-purple">
+      <span class="card-icon">📈</span>
+      <span class="card-value">{{ summary.monthAppointments }}</span>
+      <span class="card-label">Citas del Mes</span>
+    </div>
+  </div>
+
+  <!-- FILA 2: Gráficos de barras -->
+  <div class="charts-row">
+    
+    <!-- Ingresos últimos 7 días -->
+    <div class="chart-card">
+      <h3>📈 Ingresos - Últimos 7 días</h3>
+      <div class="bar-chart">
+        <div class="bar-wrapper" *ngFor="let day of dailyEarnings">
+          <div class="bar-label-top">{{ formatCurrency(day.total) }}</div>
+          <div 
+            class="bar" 
+            [style.height]="getBarHeight(day.total) + 'px'"
+            [style.background]="'#4CAF50'">
+          </div>
+          <div class="bar-label-bottom">{{ formatDate(day.date) }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Citas por estado -->
+    <div class="chart-card">
+      <h3>📋 Citas por Estado</h3>
+      <div class="horizontal-bars">
+        <div class="h-bar-wrapper" *ngFor="let status of statusCounts">
+          <div class="h-bar-label">{{ status.label }}</div>
+          <div class="h-bar-track">
+            <div 
+              class="h-bar-fill" 
+              [style.width]="(status.count / summary.totalAppointments) * 100 + '%'"
+              [style.background]="status.color">
+              <span class="h-bar-text">{{ status.count }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FILA 3: Tablas -->
+  <div class="tables-row">
+    
+    <!-- Top Clientes -->
+    <div class="table-card">
+      <h3>👥 Top Clientes</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Citas</th>
+            <th>Total</th>
+            <th>Última visita</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let client of topClients">
+            <td>{{ client.clientName }}</td>
+            <td>{{ client.totalAppointments }}</td>
+            <td>{{ formatCurrency(client.totalSpent) }}</td>
+            <td>{{ client.lastVisit ? (client.lastVisit | date:'shortDate') : 'Nunca' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Resumen por tipo de pago -->
+    <div class="table-card">
+      <h3>💳 Pagos</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Método</th>
+            <th>Cantidad</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let method of paymentMethods">
+            <td>{{ method.method }}</td>
+            <td>{{ method.count }}</td>
+            <td>{{ formatCurrency(method.total) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- FILA 4: Resumen mensual -->
+  <div class="table-card full-width">
+    <h3>📅 Últimos 6 Meses</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Mes</th>
+          <th>Ingresos</th>
+          <th>Egresos</th>
+          <th>Balance</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let month of monthlyComparison">
+          <td>{{ getMonthName(month.month) }}</td>
+          <td>{{ formatCurrency(month.income) }}</td>
+          <td>{{ formatCurrency(month.expenses) }}</td>
+          <td [class.positive]="isPositiveBalance(month.balance)" 
+              [class.negative]="!isPositiveBalance(month.balance)">
+            {{ formatCurrency(month.balance) }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

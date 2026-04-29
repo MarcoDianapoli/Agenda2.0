@@ -1,0 +1,211 @@
+/* Contenedor principal */
+.calendar-container {
+  max-width: 800px;
+  margin:0 auto;
+  padding:20px;
+  /* Fuente heredada de styles.css (Roboto) */
+}
+
+/* ========================================== */
+/* CABECERA                                   */
+/* ========================================== */
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.nav-button {
+  background: #f0f0f0;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+.nav-button:hover {
+  background: #4CAF50;
+  color: white;
+}
+
+.current-date {
+  text-align: center;
+}
+
+.current-date h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #333;
+}
+
+.today-badge {
+  display: inline-block;
+  background: #4CAF50;
+  color: white;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  margin-top: 5px;
+}
+
+/* ========================================== */
+/* RESUMEN                                    */
+/* ========================================== */
+.appointments-summary {
+  background: #e8f5e9;
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  color: #2e7d32;
+}
+
+/* ========================================== */
+/* ESTADO VACÍO                               */
+/* ========================================== */
+.no-appointments {
+  background: white;
+  border-radius: 12px;
+  padding: 60px 20px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.empty-icon {
+  font-size: 4rem;
+}
+
+.empty-state h3 {
+  color: #666;
+  margin: 15px 0 10px;
+}
+
+.empty-state p {
+  color: #999;
+}
+
+/* ========================================== */
+/* TARJETAS DE CITAS                          */
+/* ========================================== */
+.appointments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.appointment-card {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.appointment-card:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.card-time {
+  min-width: 70px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #555;
+}
+
+.card-content {
+  flex: 1;
+  padding: 0 15px;
+}
+
+.card-title {
+  margin: 0 0 5px 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.card-description {
+  margin: 0 0 10px 0;
+  color: #777;
+  font-size: 0.9rem;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 15px;
+  color: white;
+  font-size: 0.75rem;
+  margin-right: 10px;
+}
+
+.amount {
+  font-weight: bold;
+  color: #4CAF50;
+  margin-right: 10px;
+}
+
+.payment-status {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+/* ========================================== */
+/* MENÚ CONTEXTUAL                            */
+/* ========================================== */
+.card-actions {
+  position: relative;
+}
+
+.menu-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: #999;
+}
+
+.menu-button:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.context-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  min-width: 180px;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.context-menu button {
+  display: block;
+  width: 100%;
+  padding: 12px 15px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s ease;
+}
+
+.context-menu button:hover {
+  background: #f5f5f5;
+}

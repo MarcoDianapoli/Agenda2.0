@@ -1,0 +1,36 @@
+<div class="month-view-container">
+  <!-- Header -->
+  <div class="month-header">
+    <button class="nav-btn" (click)="goBack()">◀ Volver</button>
+    <h2 class="month-title">{{ monthName }}</h2>
+    <div class="spacer"></div>
+  </div>
+
+  <!-- Días de la semana -->
+  <div class="weekdays-row">
+    <div *ngFor="let wd of weekDays" class="weekday-name">{{ wd }}</div>
+  </div>
+
+  <!-- Grid de días -->
+  <div class="days-grid">
+    <div 
+      *ngFor="let day of days"
+      class="day-cell"
+      [class.empty]="day.dayNumber === 0"
+      [class.today]="isToday(day)"
+      (click)="onDayClick(day)">
+      
+      <div class="day-number" *ngIf="day.dayNumber > 0">{{ day.dayNumber }}</div>
+      
+      <!-- Puntos de colores si hay citas -->
+      <div class="day-dots" *ngIf="day.citasCount > 0">
+        <div 
+          *ngFor="let status of day.statuses"
+          class="status-dot"
+          [style.background-color]="getStatusColor(status)">
+        </div>
+        <span class="citas-count">{{ day.citasCount }}</span>
+      </div>
+    </div>
+  </div>
+</div>

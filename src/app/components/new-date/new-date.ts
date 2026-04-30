@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Cita, AppointmentStatus, PaymentStatus, AppointmentStatusLabels } from '../../models/appointment.model';
 import { ClientService } from '../../services/client.service';
 import { Client } from '../../models/client.model';
+import { AppointmentService } from '../../services/appointment';
 
 @Component({
   selector: 'app-new-date',
@@ -12,9 +13,8 @@ import { Client } from '../../models/client.model';
   templateUrl: './new-date.html',
   styleUrl: './new-date.css',
 })
-export class NewDate {
+export class NewDate implements OnInit {
   @Output() close = new EventEmitter<void>();
-  @Output() save = new EventEmitter<Cita>();
   @Input() selectedDate: Date = new Date();
   @Input() preselectedClient: Client | null = null;
 
@@ -24,9 +24,12 @@ export class NewDate {
   }));
 
   activeClients: Client[] = [];
-  selectedClientId: number | null = null;
+  isSaving = false;
 
-  constructor(private clientService: ClientService) {
+  constructor(
+    private clientService: ClientService,
+    private appointmentService: AppointmentService
+  ) {
     this.activeClients = this.clientService.getActiveClients();
   }
 
@@ -36,15 +39,14 @@ export class NewDate {
     }
   }
 
-  private formatDate(date: Date): string{
-    // Usar componentes locales para evitar problemas de zona horaria
+  private formatDate(date: Date): string {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
 
-  formData={
+  formData = {
     title: '',
     description: '',
     date: this.formatDate(new Date()),
@@ -55,46 +57,55 @@ export class NewDate {
     clientId: null as number | null
   };
 
-  onSubmit(): void{
-    if(!this.formData.title.trim()){
+  async onSubmit(): Promise<void> {
+    if (!this.formData.title.trim()) {
       alert('El titulo es obligatorio');
       return;
     }
-    // Parsear la fecha correctamente preservando la fecha local
-    const [year, month, day] = this.formData.date.split('-').map(Number);
-    const fechaLocal = new Date(year, month - 1, day);
-    
-    const nuevaCita: Cita = {
-      title: this.formData.title,
-      description: this.formData.description,
-      date: fechaLocal,
-      time: this.formData.time,
-      status: this.formData.status,
-      paymentStatus: this.formData.paymentStatus,
-      amount: this.formData.amount || undefined,
-      color: this.getColorForStatus(this.formData.status),
-      clientId: this.formData.clientId || undefined
-    };
-    this.save.emit(nuevaCita);
-  };
-  
-  private getColorForStatus(status: AppointmentStatus):string{
+
+    this.isSaving = true;
+
+    try {
+      const [year, month, day] = this.formData.date.split('-').map(Number);
+      const fechaLocal = new Date(year, month - 1, day);
+
+      const nuevaCita: Partial<Cita> = {
+        title: this.formData.title,
+        description: this.formData.description,
+        date: fechaLocal,
+        time: this.formData.time,
+        status: this.formData.status,
+        paymentStatus: this.formData.paymentStatus,
+        amount: this.formData.amount || undefined,
+        color: this.getColorForStatus(this.formData.status),
+        clientId: this.formData.clientId || undefined
+      };
+
+      await this.appointmentService.addCita(nuevaCita);
+      this.close.emit();
+    } catch (error) {
+      console.error('Error al guardar cita:', error);
+      alert('Error al guardar la cita. Por favor intenta de nuevo.');
+    } finally {
+      this.isSaving = false;
+    }
+  }
+
+  private getColorForStatus(status: AppointmentStatus): string {
     const colors: Record<AppointmentStatus, string> = {
       [AppointmentStatus.PENDING]: '#FF9800',
       [AppointmentStatus.CONFIRMED]: '#4CAF50',
       [AppointmentStatus.ARRIVED]: '#2196F3',
       [AppointmentStatus.IN_PROGRESS]: '#FFC107',
-      [AppointmentStatus.COMPLETED]: '#00897B',  // ← Cambiado
+      [AppointmentStatus.COMPLETED]: '#00897B',
       [AppointmentStatus.CANCELLED]: '#F44336',
       [AppointmentStatus.NO_SHOW]: '#9E9E9E',
       [AppointmentStatus.RESCHEDULED]: '#9C27B0'
     };
-      return colors[status] || '#000000';
+    return colors[status] || '#000000';
   }
 
-
-  onCancel(): void{
+  onCancel(): void {
     this.close.emit();
   }
-
 }

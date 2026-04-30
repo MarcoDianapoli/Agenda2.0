@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClientService } from '../../services/client.service';
@@ -28,13 +28,37 @@ export class ClientsComponent implements OnInit, OnDestroy {
   selectedClientForHistory: Client | null = null;
   selectedClientForNewAppointment: Client | null = null;
   clientAppointmentsCount: Map<number, number> = new Map();
+  loading = true;
   
   private subscription?: Subscription;
 
-  constructor(private clientService: ClientService) {}
+  constructor(private clientService: ClientService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
+    // Load initial data with Promise and force change detection
+    this.clientService.getClientsPromise()
+      .then(data => {
+        console.log('Clientes cargados:', data);
+        this.clients = data || [];
+        this.filteredClients = [...this.clients];
+        this.filterClients();
+        this.activeClientsCount = data.filter(c => c.isActive).length;
+        this.loadAppointmentCounts(data);
+        this.loading = false;
+        this.cdr.detectChanges();
+        console.log('Loading establecido a false');
+      })
+      .catch(error => {
+        console.error('Error al cargar clientes:', error);
+        this.clients = [];
+        this.filteredClients = [];
+        this.loading = false;
+        this.cdr.detectChanges();
+      });
+
+    // Subscribe for future reactive updates
     this.subscription = this.clientService.getClients().subscribe(clients => {
+      console.log('Clientes actualizados via Observable:', clients);
       this.clients = clients;
       this.filterClients();
       this.activeClientsCount = clients.filter(c => c.isActive).length;
@@ -44,10 +68,12 @@ export class ClientsComponent implements OnInit, OnDestroy {
 
   private async loadAppointmentCounts(clients: Client[]): Promise<void> {
     this.clientAppointmentsCount.clear();
-    for (const client of clients) {
-      const count = await this.clientService.getClientAppointmentsCount(client.id);
-      this.clientAppointmentsCount.set(client.id, count);
-    }
+    const clientIds = clients.map(c => c.id);
+    const counts = await this.clientService.getAppointmentCountsByClientIds(clientIds);
+    counts.forEach((count, clientId) => {
+      this.clientAppointmentsCount.set(clientId, count);
+    });
+    this.cdr.detectChanges();
   }
 
   ngOnDestroy(): void {
@@ -96,12 +122,7 @@ export class ClientsComponent implements OnInit, OnDestroy {
     this.selectedClient = null;
   }
 
-  async onModalSave(client: Client): Promise<void> {
-    if (client.id) {
-      await this.clientService.updateClient(client.id, client);
-    } else {
-      await this.clientService.addClient(client);
-    }
+  onModalClosed(): void {
     this.showModal = false;
     this.selectedClient = null;
   }

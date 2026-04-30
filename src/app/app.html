@@ -7,49 +7,11 @@
 <div *ngIf="isLoggedIn">
   <app-header (menuToggle)="onMenuToggle()" [appName]="appName"></app-header>
 
-  <!-- Vista Inicio: Calendar View -->
-  <div *ngIf="currentView === 'home'">
-    <app-calendar-view 
-      (editCita)="onEditCita($event)" 
-      (changeStatusCita)="onCitaStatusChange($event)"
-      (changePaymentStatusCita)="onCitaPaymentStatusChange($event)">
-    </app-calendar-view>
-    <app-floating-action-button (clicked)="openNewAppointmentForm()"></app-floating-action-button>
-  </div>
+  <!-- Router outlet: aquí se cargan los componentes según la URL -->
+  <router-outlet></router-outlet>
 
-  <!-- Vista Calendario: Year/Month View -->
-  <div *ngIf="currentView === 'calendar'">
-    <div *ngIf="selectedMonth === null">
-      <app-year-view 
-        (monthSelected)="onMonthSelected($event)"
-        (daySelected)="onDaySelected($event)">
-      </app-year-view>
-    </div>
-    
-    <div *ngIf="selectedMonth !== null">
-      <app-month-view 
-        [year]="getSelectedYear()"
-        [month]="selectedMonth"
-        (daySelected)="onDaySelected($event)"
-        (back)="selectedMonth = null">
-      </app-month-view>
-    </div>
-  </div>
-
-  <!-- Vista Configuración -->
-  <div *ngIf="currentView === 'settings'">
-    <app-settings></app-settings>
-  </div>
-
-  <!-- Vista Clientes -->
-  <div *ngIf="currentView === 'clients'">
-    <app-clients (newAppointmentForClient)="onNewAppointmentForClient($event)"></app-clients>
-  </div>
-
-  <!-- Vista Dashboard -->
-  <div *ngIf="currentView === 'dashboard'">
-    <app-dashboard></app-dashboard>
-  </div>
+  <!-- Botón flotante para nueva cita (visible en todas las vistas) -->
+  <app-floating-action-button (clicked)="openNewAppointmentForm()"></app-floating-action-button>
 
   <!-- Modal para mostrar citas del día seleccionado -->
   <app-day-modal 
@@ -69,22 +31,21 @@
       <button class="close-button" (click)="closeSideMenu()">✕</button>
     </div>
     <nav class="side-menu-nav">
-      <a href="#" class="menu-item" (click)="navigateTo('home')">🏠 Inicio</a>
-      <a href="#" class="menu-item" (click)="navigateTo('calendar')">📅 Calendario</a>
-      <a href="#" class="menu-item" (click)="navigateTo('clients')">👥 Clientes</a>
-      <a href="#" class="menu-item" (click)="navigateTo('dashboard')">📊 Dashboard</a>
-      <a href="#" class="menu-item" (click)="navigateTo('settings')">⚙️ Configuración</a>
+      <a routerLink="/calendar" (click)="closeSideMenu()" class="menu-item">📅 Inicio</a>
+      <a routerLink="/calendar" (click)="closeSideMenu()" class="menu-item">📅 Calendario</a>
+      <a routerLink="/clients" (click)="closeSideMenu()" class="menu-item">👥 Clientes</a>
+      <a routerLink="/dashboard" (click)="closeSideMenu()" class="menu-item">📊 Dashboard</a>
+      <a routerLink="/settings" (click)="closeSideMenu()" class="menu-item">⚙️ Configuración</a>
       <a href="#" class="menu-item logout-item" (click)="onLogout()">🚪 Cerrar Sesión</a>
     </nav>
-   </div>
+  </div>
 
-   <!-- Modales -->
-   <app-new-date 
-     *ngIf="showNewAppointmentForm" 
-     [preselectedClient]="clientForNewAppointment"
-     (close)="closeNewAppointmentForm()" 
-     (save)="saveNewAppointment($event)">
-   </app-new-date>
+  <!-- Modales -->
+  <app-new-date 
+    *ngIf="showNewAppointmentForm" 
+    [preselectedClient]="clientForNewAppointment"
+    (close)="closeNewAppointmentForm()">
+  </app-new-date>
 
   <app-status-change-modal 
     *ngIf="showStatusChangeModal && selectedCita"
@@ -103,7 +64,6 @@
   <app-edit-date 
     *ngIf="showEditModal && selectedCita"
     [cita]="selectedCita"
-    (close)="closeEditModal()" 
-    (save)="onSaveEditedCita($event)">
+    (close)="closeEditModal()">
   </app-edit-date>
 </div>

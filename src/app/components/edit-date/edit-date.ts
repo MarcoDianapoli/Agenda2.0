@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Cita, AppointmentStatus, PaymentStatus, AppointmentStatusLabels } from '../../models/appointment.model';
 import { ClientService } from '../../services/client.service';
 import { Client } from '../../models/client.model';
+import { AppointmentService } from '../../services/appointment';
 
 @Component({
   selector: 'app-edit-date',
@@ -15,7 +16,6 @@ import { Client } from '../../models/client.model';
 export class EditDate implements OnInit {
   @Input() cita!: Cita;
   @Output() close = new EventEmitter<void>();
-  @Output() save = new EventEmitter<Cita>();
 
   statusOptions = Object.entries(AppointmentStatusLabels).map(([values, label]) => ({
     values,
@@ -24,6 +24,7 @@ export class EditDate implements OnInit {
 
   activeClients: Client[] = [];
   selectedClientId: number | null = null;
+  isSaving = false;
 
   formData = {
     title: '',
@@ -36,7 +37,10 @@ export class EditDate implements OnInit {
     clientId: null as number | null
   };
 
-  constructor(private clientService: ClientService) {
+  constructor(
+    private clientService: ClientService,
+    private appointmentService: AppointmentService
+  ) {
     this.activeClients = this.clientService.getActiveClients();
   }
 
@@ -62,29 +66,37 @@ export class EditDate implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     if (!this.formData.title.trim()) {
       alert('El titulo es obligatorio');
       return;
     }
 
-    const [year, month, day] = this.formData.date.split('-').map(Number);
-    const fechaLocal = new Date(year, month - 1, day);
+    this.isSaving = true;
 
-    const citaActualizada: Cita = {
-      ...this.cita,
-      title: this.formData.title,
-      description: this.formData.description,
-      date: fechaLocal,
-      time: this.formData.time,
-      status: this.formData.status,
-      paymentStatus: this.formData.paymentStatus,
-      amount: this.formData.amount || undefined,
-      clientId: this.formData.clientId || undefined
-      // El color se actualiza automáticamente en el servicio
-    };
+    try {
+      const [year, month, day] = this.formData.date.split('-').map(Number);
+      const fechaLocal = new Date(year, month - 1, day);
 
-    this.save.emit(citaActualizada);
+      const changes: Partial<Cita> = {
+        title: this.formData.title,
+        description: this.formData.description,
+        date: fechaLocal,
+        time: this.formData.time,
+        status: this.formData.status,
+        paymentStatus: this.formData.paymentStatus,
+        amount: this.formData.amount || undefined,
+        clientId: this.formData.clientId || undefined
+      };
+
+      await this.appointmentService.updateCita(this.cita.id!, changes);
+      this.close.emit();
+    } catch (error) {
+      console.error('Error al actualizar cita:', error);
+      alert('Error al actualizar la cita. Por favor intenta de nuevo.');
+    } finally {
+      this.isSaving = false;
+    }
   }
 
   onCancel(): void {

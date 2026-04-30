@@ -1,6 +1,8 @@
 <div class="clients-container">
-  <!-- Header con búsqueda y botón agregar -->
-  <div class="clients-header">
+  <!-- Contenido principal con *ngIf else para cambio de estado confiable -->
+  <div *ngIf="!loading; else loadingTmpl">
+    <!-- Header con búsqueda y botón agregar -->
+    <div class="clients-header">
     <div class="search-box">
       <input 
         type="text" 
@@ -87,12 +89,19 @@
   </div>
 </div>
 
+  <!-- Template para loading -->
+  <ng-template #loadingTmpl>
+    <div class="loading-state">
+      <p>Cargando clientes...</p>
+    </div>
+  </ng-template>
+</div>
+
 <!-- Modal de formulario -->
 <app-client-form
   *ngIf="showModal"
   [client]="selectedClient"
-  (close)="onModalClose()"
-  (save)="onModalSave($event)">
+  (close)="onModalClosed()">
 </app-client-form>
 
 <!-- Modal de historial de cliente -->

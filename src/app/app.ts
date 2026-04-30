@@ -4,22 +4,17 @@
 
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 // Componentes que se usarán en el template
-import { CalendarViewComponent } from './components/calendar-view/calendar-view';
 import { Header } from './components/header/header';
 import { FloatingActionButton } from './components/floating-action-button/floating-action-button';
 import { NewDate } from './components/new-date/new-date';
 import { StatusChangeModal } from './components/status-change-modal/status-change-modal';
 import { PaymentStatusChange } from './components/payment-status-change/payment-status-change';
 import { EditDate } from './components/edit-date/edit-date';
-import { YearViewComponent } from './components/year-view/year-view';
-import { MonthViewComponent } from './components/month-view/month-view';
 import { DayModal } from './components/day-modal/day-modal';
-import { SettingsComponent } from './components/settings/settings';
 import { LoginComponent } from './components/login/login';
-import { ClientsComponent } from './components/clients/clients';
-import { DashboardComponent } from './components/dashboard/dashboard';
 import { Client } from './models/client.model';
 
 // Servicios
@@ -39,20 +34,15 @@ import { Cita } from './models/appointment.model';
   standalone: true,
   imports: [
     CommonModule,
-    CalendarViewComponent,       // Vista principal de la agenda
+    RouterModule,
     Header,                      // Barra superior
     FloatingActionButton,        // Botón +
     NewDate,                     // Modal de nueva cita
     StatusChangeModal,           // Modal para cambiar estado
     PaymentStatusChange,         // Modal para cambiar estado de pago
     EditDate,                    // Modal para editar cita
-    YearViewComponent,           // Vista anual
-    MonthViewComponent,          // Vista mensual
     DayModal,                    // Modal de día
-    SettingsComponent,           // Configuración
     LoginComponent,              // Login
-    ClientsComponent,            // Clientes
-    DashboardComponent           // Dashboard financiero
   ],
   templateUrl: './app.html',
   styleUrl: './app.css'
@@ -63,9 +53,6 @@ import { Cita } from './models/appointment.model';
 // CLASE DEL COMPONENTE PRINCIPAL
 // =============================================
 export class App {
-  
-  // Controla la vista actual
-  currentView: 'home' | 'calendar' | 'settings' | 'clients' | 'dashboard' = 'home';
   
   // Controla si el modal de nueva cita está visible
   showNewAppointmentForm = false;
@@ -128,7 +115,6 @@ export class App {
 
   onLogout(): void {
     this.authService.logout();
-    this.currentView = 'home';
   }
 
   // ========== MENÚ LATERAL ==========
@@ -140,23 +126,17 @@ export class App {
     this.showSideMenu = false;
   }
   
-  navigateTo(view: 'home' | 'calendar' | 'settings' | 'clients' | 'dashboard'): void {
-    this.currentView = view;
-    this.selectedMonth = null; // Reset mes al navegar
-    this.closeSideMenu();
-  }
-  
   // ========== CALENDARIO ==========
   onMonthSelected(month: number): void {
     this.selectedMonth = month;
   }
   
-   async onDaySelected(date: Date): Promise<void> {
-     this.selectedDate = date;
-     // Obtener citas para esta fecha
-     this.citasForSelectedDate = await this.appointmentService.getCitasByDate(date);
-     this.showDayModal = true;
-   }
+  async onDaySelected(date: Date): Promise<void> {
+    this.selectedDate = date;
+    // Obtener citas para esta fecha
+    this.citasForSelectedDate = await this.appointmentService.getCitasByDate(date);
+    this.showDayModal = true;
+  }
   
   closeDayModal(): void {
     this.showDayModal = false;
@@ -175,11 +155,6 @@ export class App {
      this.clientForNewAppointment = null;
    }
    
-    async saveNewAppointment(cita: Cita): Promise<void> {
-      await this.appointmentService.addCita(cita);
-      this.closeNewAppointmentForm();
-    }
-
    // ========== NUEVA CITA DESDE CLIENTE ==========
    onNewAppointmentForClient(client: Client): void {
      this.clientForNewAppointment = client;
@@ -197,10 +172,10 @@ export class App {
     this.selectedCita = null;
   }
   
-   async onStatusChanged(event: {id: number, status: any}): Promise<void> {
-     await this.appointmentService.updateCita(event.id, { status: event.status });
-     this.closeStatusChangeModal();
-   }
+  async onStatusChanged(event: {id: number, status: any}): Promise<void> {
+    await this.appointmentService.updateCita(event.id, { status: event.status });
+    this.closeStatusChangeModal();
+  }
   
   // ========== CAMBIAR ESTADO DE PAGO ==========
   onCitaPaymentStatusChange(cita: Cita): void {
@@ -213,16 +188,16 @@ export class App {
     this.selectedCita = null;
   }
   
-   async onPaymentStatusChanged(event: {id: number, paymentStatus: any, paidAmount?: number}): Promise<void> {
-     const updateData: any = { paymentStatus: event.paymentStatus };
-     
-     if (event.paidAmount !== undefined) {
-       updateData.paidAmount = event.paidAmount;
-     }
-     
-     await this.appointmentService.updateCita(event.id, updateData);
-     this.closePaymentStatusModal();
-   }
+  async onPaymentStatusChanged(event: {id: number, paymentStatus: any, paidAmount?: number}): Promise<void> {
+    const updateData: any = { paymentStatus: event.paymentStatus };
+    
+    if (event.paidAmount !== undefined) {
+      updateData.paidAmount = event.paidAmount;
+    }
+    
+    await this.appointmentService.updateCita(event.id, updateData);
+    this.closePaymentStatusModal();
+  }
   
   // ========== EDITAR CITA ==========
   onEditCita(cita: Cita): void {
@@ -234,11 +209,4 @@ export class App {
     this.showEditModal = false;
     this.selectedCita = null;
   }
-  
-   async onSaveEditedCita(cita: Cita): Promise<void> {
-     if (cita.id) {
-       await this.appointmentService.updateCita(cita.id, cita);
-     }
-     this.closeEditModal();
-   }
 }

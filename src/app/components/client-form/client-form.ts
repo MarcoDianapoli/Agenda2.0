@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Client, CLIENT_COLORS } from '../../models/client.model';
+import { ClientService } from '../../services/client.service';
 
 @Component({
   selector: 'app-client-form',
@@ -13,7 +14,6 @@ import { Client, CLIENT_COLORS } from '../../models/client.model';
 export class ClientFormComponent implements OnInit {
   @Input() client: Client | null = null;
   @Output() close = new EventEmitter<void>();
-  @Output() save = new EventEmitter<Client>();
 
   formData: Partial<Client> = {
     name: '',
@@ -26,6 +26,9 @@ export class ClientFormComponent implements OnInit {
 
   colors: string[] = CLIENT_COLORS;
   isEditMode = false;
+  isSaving = false;
+
+  constructor(private clientService: ClientService) {}
 
   ngOnInit(): void {
     if (this.client) {
@@ -43,7 +46,7 @@ export class ClientFormComponent implements OnInit {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
-  onSave(): void {
+  async onSave(): Promise<void> {
     if (!this.formData.name?.trim()) {
       alert('El nombre es obligatorio');
       return;
@@ -54,7 +57,21 @@ export class ClientFormComponent implements OnInit {
       return;
     }
 
-    this.save.emit(this.formData as Client);
+    this.isSaving = true;
+
+    try {
+      if (this.isEditMode && this.client?.id) {
+        await this.clientService.updateClient(this.client.id, this.formData);
+      } else {
+        await this.clientService.addClient(this.formData);
+      }
+      this.close.emit();
+    } catch (error) {
+      console.error('Error al guardar cliente:', error);
+      alert('Error al guardar el cliente. Por favor intenta de nuevo.');
+    } finally {
+      this.isSaving = false;
+    }
   }
 
   onOverlayClick(event: MouseEvent): void {

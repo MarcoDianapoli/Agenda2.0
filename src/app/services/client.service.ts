@@ -18,6 +18,24 @@ export class ClientService {
     return this.clientsSubject.asObservable();
   }
 
+  // Método para obtener clientes como Promise (para usar con async/await)
+  async getClientsPromise(): Promise<Client[]> {
+    const { data, error } = await supabase
+      .from('clients')
+      .select('*')
+      .order('name', { ascending: true });
+    
+    if (error) {
+      console.error('Error Supabase:', error);
+      throw error;
+    }
+    
+    const clients = (data || []).map(this.mapFromSupabase);
+    this.clients = clients;
+    this.clientsSubject.next([...this.clients]);
+    return clients;
+  }
+
   getClientById(id: number): Client | undefined {
     return this.clients.find(c => c.id === id);
   }
@@ -139,10 +157,40 @@ export class ClientService {
       .eq('client_id', clientId);
     
     if (error) {
-      console.error('Error counting appointments:', error);
+      console.error('Error counting appointments for client', clientId, ':', error);
       return 0;
     }
     
     return count || 0;
+  }
+
+  // Obtener conteos de citas para múltiples clientes en una sola consulta
+  async getAppointmentCountsByClientIds(clientIds: number[]): Promise<Map<number, number>> {
+    const counts = new Map<number, number>();
+    
+    if (clientIds.length === 0) return counts;
+    
+    const { data, error } = await supabase
+      .from('citas')
+      .select('client_id')
+      .in('client_id', clientIds);
+    
+    if (error) {
+      console.error('Error counting appointments:', error);
+      return counts;
+    }
+    
+    // Contar ocurrencias por client_id
+    const countMap: { [key: number]: number } = {};
+    (data || []).forEach((row: any) => {
+      countMap[row.client_id] = (countMap[row.client_id] || 0) + 1;
+    });
+    
+    // Convertir a Map
+    Object.entries(countMap).forEach(([clientId, count]) => {
+      counts.set(Number(clientId), count);
+    });
+    
+    return counts;
   }
 }

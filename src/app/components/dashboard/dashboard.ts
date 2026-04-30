@@ -26,13 +26,13 @@ export class DashboardComponent implements OnInit {
     this.loadData();
   }
 
-  loadData(): void {
-    this.summary = this.dashboardService.getFinancialSummary();
-    this.dailyEarnings = this.dashboardService.getDailyEarnings(7);
-    this.paymentMethods = this.dashboardService.getPaymentMethodSummary();
-    this.topClients = this.dashboardService.getTopClients(5);
-    this.statusCounts = this.dashboardService.getAppointmentsByStatus();
-    this.monthlyComparison = this.dashboardService.getMonthlyComparison();
+  async loadData(): Promise<void> {
+    this.summary = await this.dashboardService.getFinancialSummary();
+    this.dailyEarnings = await this.dashboardService.getDailyEarnings(7);
+    this.paymentMethods = await this.dashboardService.getPaymentMethodSummary();
+    this.topClients = await this.dashboardService.getTopClients(5);
+    this.statusCounts = await this.dashboardService.getAppointmentsByStatus();
+    this.monthlyComparison = await this.dashboardService.getMonthlyComparison();
     
     this.maxDailyTotal = Math.max(...this.dailyEarnings.map(d => d.total), 1);
   }

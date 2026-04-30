@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Client, CLIENT_COLORS } from '../models/client.model';
+import { supabase } from '../config/supabase.config';
 
 @Injectable({
   providedIn: 'root'
@@ -10,10 +11,7 @@ export class ClientService {
   private clientsSubject = new BehaviorSubject<Client[]>([]);
   
   constructor() {
-    this.loadFromLocalStorage();
-    if (this.clients.length === 0) {
-      this.createSampleClients();
-    }
+    this.loadClients();
   }
 
   getClients(): Observable<Client[]> {
@@ -28,98 +26,123 @@ export class ClientService {
     return this.clients.filter(c => c.isActive);
   }
 
-  addClient(client: Partial<Client>): void {
-    const newId = Math.max(0, ...this.clients.map(c => c.id)) + 1;
-    const newClient: Client = {
-      id: newId,
-      name: client.name || '',
-      email: client.email,
-      phone: client.phone,
-      address: client.address,
-      notes: client.notes,
-      isActive: true,
-      color: client.color || CLIENT_COLORS[Math.floor(Math.random() * CLIENT_COLORS.length)],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      totalAppointments: 0
-    };
-    this.clients.push(newClient);
-    this.saveToLocalStorage();
-  }
-
-  updateClient(id: number, changes: Partial<Client>): void {
-    const index = this.clients.findIndex(c => c.id === id);
-    if (index !== -1) {
-      this.clients[index] = {
-        ...this.clients[index],
-        ...changes,
-        updatedAt: new Date()
-      };
-      this.saveToLocalStorage();
+  // Cargar clientes desde Supabase
+  private async loadClients(): Promise<void> {
+    const { data, error } = await supabase
+      .from('clients')
+      .select('*')
+      .order('name', { ascending: true });
+    
+    if (error) {
+      console.error('Error loading clients:', error);
+      return;
     }
-  }
-
-  deleteClient(id: number): void {
-    this.updateClient(id, { isActive: false });
-  }
-
-  restoreClient(id: number): void {
-    this.updateClient(id, { isActive: true });
-  }
-
-  getClientAppointmentsCount(clientId: number): number {
-    const appointmentsStr = localStorage.getItem('agenda_citas');
-    if (!appointmentsStr) return 0;
-    try {
-      const appointments = JSON.parse(appointmentsStr);
-      return appointments.filter((a: any) => a.clientId === clientId).length;
-    } catch {
-      return 0;
-    }
-  }
-
-  private createSampleClients(): void {
-    const sampleClients: Partial<Client>[] = [
-      { name: 'María González', email: 'maria@email.com', phone: '555-0101', notes: 'Prefiere citas por la mañana' },
-      { name: 'Juan Pérez', email: 'juan@email.com', phone: '555-0102', notes: 'Cliente frecuente' },
-      { name: 'Ana Martínez', email: 'ana@email.com', phone: '555-0103', notes: '' },
-      { name: 'Carlos López', email: 'carlos@email.com', phone: '555-0104', notes: 'Paga con tarjeta' },
-      { name: 'Laura Sánchez', email: 'laura@email.com', phone: '555-0105', notes: 'Primera cita fue en enero' }
-    ];
-
-    sampleClients.forEach((client, index) => {
-      const newClient: Client = {
-        id: index + 1,
-        name: client.name || '',
-        email: client.email,
-        phone: client.phone,
-        address: client.address,
-        notes: client.notes,
-        isActive: true,
-        color: CLIENT_COLORS[index],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        totalAppointments: 0
-      };
-      this.clients.push(newClient);
-    });
-    this.saveToLocalStorage();
-  }
-
-  private saveToLocalStorage(): void {
-    localStorage.setItem('agenda_clients', JSON.stringify(this.clients));
+    
+    this.clients = (data || []).map(this.mapFromSupabase);
     this.clientsSubject.next([...this.clients]);
   }
 
-  private loadFromLocalStorage(): void {
-    const stored = localStorage.getItem('agenda_clients');
-    if (stored) {
-      try {
-        this.clients = JSON.parse(stored);
-        this.clientsSubject.next([...this.clients]);
-      } catch {
-        this.clients = [];
-      }
+  // Notificar cambios recargando desde Supabase
+  private async notifyChanges(): Promise<void> {
+    await this.loadClients();
+  }
+
+  // Mapear de snake_case (Supabase) a camelCase (modelo)
+  private mapFromSupabase(data: any): Client {
+    return {
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      address: data.address,
+      notes: data.notes,
+      isActive: data.is_active,
+      color: data.color,
+      totalAppointments: data.total_appointments,
+      lastAppointmentDate: data.last_appointment_date ? new Date(data.last_appointment_date + 'T00:00:00') : undefined,
+      createdAt: data.created_at ? new Date(data.created_at) : undefined,
+      updatedAt: data.updated_at ? new Date(data.updated_at) : undefined
+    };
+  }
+
+  // Mapear de camelCase (modelo) a snake_case (Supabase)
+  private mapToSupabase(client: Partial<Client>): any {
+    const mapped: any = {};
+    if (client.name !== undefined) mapped.name = client.name;
+    if (client.email !== undefined) mapped.email = client.email;
+    if (client.phone !== undefined) mapped.phone = client.phone;
+    if (client.address !== undefined) mapped.address = client.address;
+    if (client.notes !== undefined) mapped.notes = client.notes;
+    if (client.isActive !== undefined) mapped.is_active = client.isActive;
+    if (client.color !== undefined) mapped.color = client.color;
+    if (client.totalAppointments !== undefined) mapped.total_appointments = client.totalAppointments;
+    if (client.lastAppointmentDate !== undefined) {
+      mapped.last_appointment_date = client.lastAppointmentDate instanceof Date 
+        ? client.lastAppointmentDate.toISOString().split('T')[0]
+        : client.lastAppointmentDate;
     }
+    if (client.createdAt !== undefined) mapped.created_at = client.createdAt;
+    if (client.updatedAt !== undefined) mapped.updated_at = client.updatedAt;
+    return mapped;
+  }
+
+  async addClient(client: Partial<Client>): Promise<void> {
+    const newClient = {
+      ...client,
+      isActive: true,
+      color: client.color || CLIENT_COLORS[Math.floor(Math.random() * CLIENT_COLORS.length)],
+      totalAppointments: 0
+    };
+    
+    const { error } = await supabase
+      .from('clients')
+      .insert([this.mapToSupabase(newClient)])
+      .select();
+    
+    if (error) {
+      console.error('Error adding client:', error);
+      return;
+    }
+    
+    await this.notifyChanges();
+  }
+
+  async updateClient(id: number, changes: Partial<Client>): Promise<void> {
+    const mappedChanges = this.mapToSupabase(changes);
+    
+    const { error } = await supabase
+      .from('clients')
+      .update(mappedChanges)
+      .eq('id', id)
+      .select();
+    
+    if (error) {
+      console.error('Error updating client:', error);
+      return;
+    }
+    
+    await this.notifyChanges();
+  }
+
+  async deleteClient(id: number): Promise<void> {
+    await this.updateClient(id, { isActive: false });
+  }
+
+  async restoreClient(id: number): Promise<void> {
+    await this.updateClient(id, { isActive: true });
+  }
+
+  async getClientAppointmentsCount(clientId: number): Promise<number> {
+    const { count, error } = await supabase
+      .from('citas')
+      .select('*', { count: 'exact', head: true })
+      .eq('client_id', clientId);
+    
+    if (error) {
+      console.error('Error counting appointments:', error);
+      return 0;
+    }
+    
+    return count || 0;
   }
 }

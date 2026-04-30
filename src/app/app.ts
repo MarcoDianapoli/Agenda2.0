@@ -151,20 +151,12 @@ export class App {
     this.selectedMonth = month;
   }
   
-  onDaySelected(date: Date): void {
-    this.selectedDate = date;
-    // Obtener citas para esta fecha
-    const service = this.appointmentService as any;
-    if (service.appointments) {
-      this.citasForSelectedDate = service.appointments.filter((cita: Cita) => {
-        const cd = new Date(cita.date);
-        return cd.getFullYear() === date.getFullYear() &&
-               cd.getMonth() === date.getMonth() &&
-               cd.getDate() === date.getDate();
-      });
-    }
-    this.showDayModal = true;
-  }
+   async onDaySelected(date: Date): Promise<void> {
+     this.selectedDate = date;
+     // Obtener citas para esta fecha
+     this.citasForSelectedDate = await this.appointmentService.getCitasByDate(date);
+     this.showDayModal = true;
+   }
   
   closeDayModal(): void {
     this.showDayModal = false;
@@ -183,10 +175,10 @@ export class App {
      this.clientForNewAppointment = null;
    }
    
-   saveNewAppointment(cita: Cita): void {
-     this.appointmentService.addCita(cita);
-     this.closeNewAppointmentForm();
-   }
+    async saveNewAppointment(cita: Cita): Promise<void> {
+      await this.appointmentService.addCita(cita);
+      this.closeNewAppointmentForm();
+    }
 
    // ========== NUEVA CITA DESDE CLIENTE ==========
    onNewAppointmentForClient(client: Client): void {
@@ -205,10 +197,10 @@ export class App {
     this.selectedCita = null;
   }
   
-  onStatusChanged(event: {id: number, status: any}): void {
-    this.appointmentService.updateCita(event.id, { status: event.status });
-    this.closeStatusChangeModal();
-  }
+   async onStatusChanged(event: {id: number, status: any}): Promise<void> {
+     await this.appointmentService.updateCita(event.id, { status: event.status });
+     this.closeStatusChangeModal();
+   }
   
   // ========== CAMBIAR ESTADO DE PAGO ==========
   onCitaPaymentStatusChange(cita: Cita): void {
@@ -221,16 +213,16 @@ export class App {
     this.selectedCita = null;
   }
   
-  onPaymentStatusChanged(event: {id: number, paymentStatus: any, paidAmount?: number}): void {
-    const updateData: any = { paymentStatus: event.paymentStatus };
-    
-    if (event.paidAmount !== undefined) {
-      updateData.paidAmount = event.paidAmount;
-    }
-    
-    this.appointmentService.updateCita(event.id, updateData);
-    this.closePaymentStatusModal();
-  }
+   async onPaymentStatusChanged(event: {id: number, paymentStatus: any, paidAmount?: number}): Promise<void> {
+     const updateData: any = { paymentStatus: event.paymentStatus };
+     
+     if (event.paidAmount !== undefined) {
+       updateData.paidAmount = event.paidAmount;
+     }
+     
+     await this.appointmentService.updateCita(event.id, updateData);
+     this.closePaymentStatusModal();
+   }
   
   // ========== EDITAR CITA ==========
   onEditCita(cita: Cita): void {
@@ -243,10 +235,10 @@ export class App {
     this.selectedCita = null;
   }
   
-  onSaveEditedCita(cita: Cita): void {
-    if (cita.id) {
-      this.appointmentService.updateCita(cita.id, cita);
-    }
-    this.closeEditModal();
-  }
+   async onSaveEditedCita(cita: Cita): Promise<void> {
+     if (cita.id) {
+       await this.appointmentService.updateCita(cita.id, cita);
+     }
+     this.closeEditModal();
+   }
 }

@@ -27,6 +27,7 @@ export class ClientsComponent implements OnInit, OnDestroy {
   showHistory: boolean = false;
   selectedClientForHistory: Client | null = null;
   selectedClientForNewAppointment: Client | null = null;
+  clientAppointmentsCount: Map<number, number> = new Map();
   
   private subscription?: Subscription;
 
@@ -37,7 +38,16 @@ export class ClientsComponent implements OnInit, OnDestroy {
       this.clients = clients;
       this.filterClients();
       this.activeClientsCount = clients.filter(c => c.isActive).length;
+      this.loadAppointmentCounts(clients);
     });
+  }
+
+  private async loadAppointmentCounts(clients: Client[]): Promise<void> {
+    this.clientAppointmentsCount.clear();
+    for (const client of clients) {
+      const count = await this.clientService.getClientAppointmentsCount(client.id);
+      this.clientAppointmentsCount.set(client.id, count);
+    }
   }
 
   ngOnDestroy(): void {
@@ -73,11 +83,11 @@ export class ClientsComponent implements OnInit, OnDestroy {
     this.showModal = true;
   }
 
-  toggleClientStatus(client: Client): void {
+  async toggleClientStatus(client: Client): Promise<void> {
     if (client.isActive) {
-      this.clientService.deleteClient(client.id);
+      await this.clientService.deleteClient(client.id);
     } else {
-      this.clientService.restoreClient(client.id);
+      await this.clientService.restoreClient(client.id);
     }
   }
 
@@ -86,18 +96,18 @@ export class ClientsComponent implements OnInit, OnDestroy {
     this.selectedClient = null;
   }
 
-  onModalSave(client: Client): void {
+  async onModalSave(client: Client): Promise<void> {
     if (client.id) {
-      this.clientService.updateClient(client.id, client);
+      await this.clientService.updateClient(client.id, client);
     } else {
-      this.clientService.addClient(client);
+      await this.clientService.addClient(client);
     }
     this.showModal = false;
     this.selectedClient = null;
   }
 
   getClientAppointmentsCount(clientId: number): number {
-    return this.clientService.getClientAppointmentsCount(clientId);
+    return this.clientAppointmentsCount.get(clientId) || 0;
   }
 
   formatDate(date?: Date): string {

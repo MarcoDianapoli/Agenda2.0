@@ -145,9 +145,9 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   }
 
   // Eliminar cita
-  deleteAppointment(cita: Cita): void {
+  async deleteAppointment(cita: Cita): Promise<void> {
     if (cita.id && confirm('¿Estás seguro de eliminar esta cita?')) {
-      this.appointmentService.deleteCita(cita.id);
+      await this.appointmentService.deleteCita(cita.id);
       this.activeMenuId = null;
     }
   }

@@ -14,8 +14,8 @@ export class DashboardService {
     private clientService: ClientService
   ) {}
 
-  getFinancialSummary(): FinancialSummary {
-    const citas = this.appointmentService.getCitas();
+  async getFinancialSummary(): Promise<FinancialSummary> {
+     const citas = await this.appointmentService.getCitas();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -67,8 +67,8 @@ export class DashboardService {
     };
   }
 
-  getDailyEarnings(days: number): DailyEarning[] {
-    const citas = this.appointmentService.getCitas();
+  async getDailyEarnings(days: number): Promise<DailyEarning[]> {
+     const citas = await this.appointmentService.getCitas();
     const result: DailyEarning[] = [];
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -93,8 +93,8 @@ export class DashboardService {
     return result;
   }
 
-  getPaymentMethodSummary(): PaymentMethodSummary[] {
-    const citas = this.appointmentService.getCitas();
+  async getPaymentMethodSummary(): Promise<PaymentMethodSummary[]> {
+     const citas = await this.appointmentService.getCitas();
     const groups: { [key: string]: { count: number; total: number } } = {};
 
     citas.forEach(c => {
@@ -113,8 +113,8 @@ export class DashboardService {
     }));
   }
 
-  getTopClients(limit: number): TopClient[] {
-    const citas = this.appointmentService.getCitas();
+  async getTopClients(limit: number): Promise<TopClient[]> {
+     const citas = await this.appointmentService.getCitas();
     const clientGroups: { [key: number]: { count: number; total: number; lastVisit: Date | null } } = {};
 
     citas.forEach(c => {
@@ -147,8 +147,8 @@ export class DashboardService {
       .slice(0, limit);
   }
 
-  getAppointmentsByStatus(): StatusCount[] {
-    const citas = this.appointmentService.getCitas();
+  async getAppointmentsByStatus(): Promise<StatusCount[]> {
+     const citas = await this.appointmentService.getCitas();
     const groups: { [key: string]: number } = {};
 
     citas.forEach(c => {
@@ -177,8 +177,8 @@ export class DashboardService {
     }));
   }
 
-  getMonthlyComparison(): MonthlyComparison[] {
-    const citas = this.appointmentService.getCitas();
+  async getMonthlyComparison(): Promise<MonthlyComparison[]> {
+     const citas = await this.appointmentService.getCitas();
     const months: { [key: string]: { income: number } } = {};
     const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
                        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];

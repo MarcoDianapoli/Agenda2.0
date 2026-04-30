@@ -1,4 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { Client } from '../../models/client.model';
 import { Cita, AppointmentStatusLabels } from '../../models/appointment.model';
@@ -20,8 +21,8 @@ export class ClientHistoryComponent implements OnInit {
 
   constructor(private appointmentService: AppointmentService) {}
 
-  ngOnInit(): void {
-    const citas = this.appointmentService.getCitas();
+  async ngOnInit(): Promise<void> {
+    const citas = await this.appointmentService.getCitas();
     this.appointments = citas
       .filter((c: Cita) => c.clientId === this.client.id)
       .sort((a: Cita, b: Cita) => {
